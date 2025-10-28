@@ -1,261 +1,232 @@
 ---
 source: crates/ruff_linter/src/rules/ruff/mod.rs
 ---
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
  --> RUF066.py:4:4
   |
-3 | # Errors - Dict literals (always non-trivial)
-4 | if key in {"foo": 1, "bar": 2}:  # RUF066
-  |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3 | # Errors - Lists with complex elements
+4 | if item in [[1, 2], [3, 4]]:  # RUF066
+  |    ^^^^^^^^^^^^^^^^^^^^^^^^
 5 |     pass
   |
 help: Convert to equality comparison
 1 | # Test cases for RUF066: Inefficient membership test
 2 | 
-3 | # Errors - Dict literals (always non-trivial)
-  - if key in {"foo": 1, "bar": 2}:  # RUF066
-4 + if key == "foo" or key == "bar":  # RUF066
+3 | # Errors - Lists with complex elements
+  - if item in [[1, 2], [3, 4]]:  # RUF066
+4 + if item == ([1, 2]) or item == ([3, 4]):  # RUF066
 5 |     pass
 6 | 
-7 | if key in {"a": 1}:  # RUF066 (single item)
+7 | if item in [{1}, {2}, {3}]:  # RUF066
 note: This is an unsafe fix and may change runtime behavior
 
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
  --> RUF066.py:7:4
   |
 5 |     pass
 6 |
-7 | if key in {"a": 1}:  # RUF066 (single item)
-  |    ^^^^^^^^^^^^^^^
+7 | if item in [{1}, {2}, {3}]:  # RUF066
+  |    ^^^^^^^^^^^^^^^^^^^^^^^
 8 |     pass
   |
 help: Convert to equality comparison
-4  | if key in {"foo": 1, "bar": 2}:  # RUF066
+4  | if item in [[1, 2], [3, 4]]:  # RUF066
 5  |     pass
 6  | 
-   - if key in {"a": 1}:  # RUF066 (single item)
-7  + if key == "a":  # RUF066 (single item)
+   - if item in [{1}, {2}, {3}]:  # RUF066
+7  + if item == ({1}) or item == ({2}) or item == ({3}):  # RUF066
 8  |     pass
 9  | 
-10 | if key not in {"foo": 1, "bar": 2, "baz": 3}:  # RUF066
+10 | if item in [{"a": 1}, {"b": 2}]:  # RUF066
 note: This is an unsafe fix and may change runtime behavior
 
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
   --> RUF066.py:10:4
    |
  8 |     pass
  9 |
-10 | if key not in {"foo": 1, "bar": 2, "baz": 3}:  # RUF066
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+10 | if item in [{"a": 1}, {"b": 2}]:  # RUF066
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 11 |     pass
    |
 help: Convert to equality comparison
-7  | if key in {"a": 1}:  # RUF066 (single item)
+7  | if item in [{1}, {2}, {3}]:  # RUF066
 8  |     pass
 9  | 
-   - if key not in {"foo": 1, "bar": 2, "baz": 3}:  # RUF066
-10 + if key != "foo" and key != "bar" and key != "baz":  # RUF066
+   - if item in [{"a": 1}, {"b": 2}]:  # RUF066
+10 + if item == ({"a": 1}) or item == ({"b": 2}):  # RUF066
 11 |     pass
 12 | 
-13 | if item in {1: "a", 2: "b"}:  # RUF066 (numeric keys)
+13 | # OK - Sets with tuple values of simple elements (optimized)
 note: This is an unsafe fix and may change runtime behavior
 
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
-  --> RUF066.py:13:4
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+  --> RUF066.py:80:4
    |
-11 |     pass
-12 |
-13 | if item in {1: "a", 2: "b"}:  # RUF066 (numeric keys)
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^
-14 |     pass
+79 | # Test with 'not in' operator
+80 | if item not in [[1], [2]]:  # RUF066
+   |    ^^^^^^^^^^^^^^^^^^^^^^
+81 |     pass
    |
 help: Convert to equality comparison
-10 | if key not in {"foo": 1, "bar": 2, "baz": 3}:  # RUF066
-11 |     pass
-12 | 
-   - if item in {1: "a", 2: "b"}:  # RUF066 (numeric keys)
-13 + if item == 1 or item == 2:  # RUF066 (numeric keys)
-14 |     pass
-15 | 
-16 | if item in {None: 1, True: 2, False: 3}:  # RUF066 (bool/None keys)
+77 |     pass
+78 | 
+79 | # Test with 'not in' operator
+   - if item not in [[1], [2]]:  # RUF066
+80 + if item != ([1]) and item != ([2]):  # RUF066
+81 |     pass
+82 | 
+83 | # Complex expressions
 note: This is an unsafe fix and may change runtime behavior
 
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
-  --> RUF066.py:16:4
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+  --> RUF066.py:84:10
    |
-14 |     pass
-15 |
-16 | if item in {None: 1, True: 2, False: 3}:  # RUF066 (bool/None keys)
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-17 |     pass
+83 | # Complex expressions
+84 | result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
+   |          ^^^^^^^^^^^^^^^^^^
+85 |
+86 | # Test with function calls in container elements
    |
 help: Convert to equality comparison
-13 | if item in {1: "a", 2: "b"}:  # RUF066 (numeric keys)
-14 |     pass
-15 | 
-   - if item in {None: 1, True: 2, False: 3}:  # RUF066 (bool/None keys)
-16 + if item == None or item == True or item == False:  # RUF066 (bool/None keys)
-17 |     pass
-18 | 
-19 | # Errors - Lists with complex elements
+81 |     pass
+82 | 
+83 | # Complex expressions
+   - result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
+84 + result = item == ([1]) or item == ([2]) or item in [[3], [4]]  # RUF066 (both)
+85 | 
+86 | # Test with function calls in container elements
+87 | if item in [func(), func2()]:  # RUF066
 note: This is an unsafe fix and may change runtime behavior
 
-RUF066 Membership test against list/tuple with complex elements requires reconstructing elements on each test; use equality comparison or pre-compute the container
-  --> RUF066.py:20:4
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+  --> RUF066.py:84:32
    |
-19 | # Errors - Lists with complex elements
-20 | if item in [[1, 2], [3, 4]]:  # RUF066
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^
-21 |     pass
-   |
-help: Convert to equality comparison
-
-RUF066 Membership test against list/tuple with complex elements requires reconstructing elements on each test; use equality comparison or pre-compute the container
-  --> RUF066.py:23:4
-   |
-21 |     pass
-22 |
-23 | if item in [{1}, {2}, {3}]:  # RUF066
-   |    ^^^^^^^^^^^^^^^^^^^^^^^
-24 |     pass
+83 | # Complex expressions
+84 | result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
+   |                                ^^^^^^^^^^^^^^^^^^
+85 |
+86 | # Test with function calls in container elements
    |
 help: Convert to equality comparison
+81 |     pass
+82 | 
+83 | # Complex expressions
+   - result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
+84 + result = item in [[1], [2]] or item == ([3]) or item == ([4])  # RUF066 (both)
+85 | 
+86 | # Test with function calls in container elements
+87 | if item in [func(), func2()]:  # RUF066
+note: This is an unsafe fix and may change runtime behavior
 
-RUF066 Membership test against list/tuple with complex elements requires reconstructing elements on each test; use equality comparison or pre-compute the container
-  --> RUF066.py:26:4
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+  --> RUF066.py:87:4
    |
-24 |     pass
-25 |
-26 | if item in [{"a": 1}, {"b": 2}]:  # RUF066
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-27 |     pass
+86 | # Test with function calls in container elements
+87 | if item in [func(), func2()]:  # RUF066
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+88 |     pass
    |
 help: Convert to equality comparison
+84 | result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
+85 | 
+86 | # Test with function calls in container elements
+   - if item in [func(), func2()]:  # RUF066
+87 + if item == (func()) or item == (func2()):  # RUF066
+88 |     pass
+89 | 
+90 | # Test with comprehensions in container
+note: This is an unsafe fix and may change runtime behavior
 
-RUF066 Membership test against list/tuple with complex elements requires reconstructing elements on each test; use equality comparison or pre-compute the container
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+  --> RUF066.py:95:4
+   |
+94 | # Test with operations in elements
+95 | if item in [1 + 2, 3 + 4]:  # RUF066 (operations are complex)
+   |    ^^^^^^^^^^^^^^^^^^^^^^
+96 |     pass
+   |
+help: Convert to equality comparison
+92 |     pass
+93 | 
+94 | # Test with operations in elements
+   - if item in [1 + 2, 3 + 4]:  # RUF066 (operations are complex)
+95 + if item == (1 + 2) or item == (3 + 4):  # RUF066 (operations are complex)
+96 |     pass
+97 | 
+98 | # Test with lambda
+note: This is an unsafe fix and may change runtime behavior
+
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
    --> RUF066.py:99:4
     |
- 98 | # Test with 'not in' operator
- 99 | if item not in [[1], [2]]:  # RUF066
-    |    ^^^^^^^^^^^^^^^^^^^^^^
-100 |     pass
-    |
-help: Convert to equality comparison
-
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
-   --> RUF066.py:103:10
-    |
-102 | # Complex expressions with dict
-103 | result = key in {"a": 1, "b": 2} or key in {"c": 3}  # RUF066 (both)
-    |          ^^^^^^^^^^^^^^^^^^^^^^^
-104 |
-105 | # Test with function calls in container elements
-    |
-help: Convert to equality comparison
-100 |     pass
-101 | 
-102 | # Complex expressions with dict
-    - result = key in {"a": 1, "b": 2} or key in {"c": 3}  # RUF066 (both)
-103 + result = key == "a" or key == "b" or key in {"c": 3}  # RUF066 (both)
-104 | 
-105 | # Test with function calls in container elements
-106 | if item in [func(), func2()]:  # RUF066
-note: This is an unsafe fix and may change runtime behavior
-
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
-   --> RUF066.py:103:37
-    |
-102 | # Complex expressions with dict
-103 | result = key in {"a": 1, "b": 2} or key in {"c": 3}  # RUF066 (both)
-    |                                     ^^^^^^^^^^^^^^^
-104 |
-105 | # Test with function calls in container elements
-    |
-help: Convert to equality comparison
-100 |     pass
-101 | 
-102 | # Complex expressions with dict
-    - result = key in {"a": 1, "b": 2} or key in {"c": 3}  # RUF066 (both)
-103 + result = key in {"a": 1, "b": 2} or key == "c"  # RUF066 (both)
-104 | 
-105 | # Test with function calls in container elements
-106 | if item in [func(), func2()]:  # RUF066
-note: This is an unsafe fix and may change runtime behavior
-
-RUF066 Membership test against list/tuple with complex elements requires reconstructing elements on each test; use equality comparison or pre-compute the container
-   --> RUF066.py:106:4
-    |
-105 | # Test with function calls in container elements
-106 | if item in [func(), func2()]:  # RUF066
-    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
-107 |     pass
-    |
-help: Convert to equality comparison
-
-RUF066 Membership test against list/tuple with complex elements requires reconstructing elements on each test; use equality comparison or pre-compute the container
-   --> RUF066.py:114:4
-    |
-113 | # Test with operations in elements
-114 | if item in [1 + 2, 3 + 4]:  # RUF066 (operations are complex)
-    |    ^^^^^^^^^^^^^^^^^^^^^^
-115 |     pass
-    |
-help: Convert to equality comparison
-
-RUF066 Membership test against list/tuple with complex elements requires reconstructing elements on each test; use equality comparison or pre-compute the container
-   --> RUF066.py:118:4
-    |
-117 | # Test with lambda
-118 | if item in [lambda x: x, lambda y: y]:  # RUF066
+ 98 | # Test with lambda
+ 99 | if item in [lambda x: x, lambda y: y]:  # RUF066
     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-119 |     pass
+100 |     pass
     |
 help: Convert to equality comparison
-
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
-   --> RUF066.py:122:4
-    |
-121 | # Multiple comparisons (chained)
-122 | if key in {"a": 1} and value in {"b": 2}:  # RUF066 (both)
-    |    ^^^^^^^^^^^^^^^
-123 |     pass
-    |
-help: Convert to equality comparison
-119 |     pass
-120 | 
-121 | # Multiple comparisons (chained)
-    - if key in {"a": 1} and value in {"b": 2}:  # RUF066 (both)
-122 + if key == "a" and value in {"b": 2}:  # RUF066 (both)
-123 |     pass
-124 | 
-125 | # Large dict (no fix due to >10 element limit)
+96  |     pass
+97  | 
+98  | # Test with lambda
+    - if item in [lambda x: x, lambda y: y]:  # RUF066
+99  + if item == (lambda x: x) or item == (lambda y: y):  # RUF066
+100 |     pass
+101 | 
+102 | # Multiple comparisons (chained)
 note: This is an unsafe fix and may change runtime behavior
 
-RUF066 [*] Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
-   --> RUF066.py:122:24
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+   --> RUF066.py:103:4
     |
-121 | # Multiple comparisons (chained)
-122 | if key in {"a": 1} and value in {"b": 2}:  # RUF066 (both)
-    |                        ^^^^^^^^^^^^^^^^^
-123 |     pass
+102 | # Multiple comparisons (chained)
+103 | if item in [[1], [2]] and item in [[3], [4]]:  # RUF066 (both)
+    |    ^^^^^^^^^^^^^^^^^^
+104 |     pass
     |
 help: Convert to equality comparison
-119 |     pass
-120 | 
-121 | # Multiple comparisons (chained)
-    - if key in {"a": 1} and value in {"b": 2}:  # RUF066 (both)
-122 + if key in {"a": 1} and value == "b":  # RUF066 (both)
-123 |     pass
-124 | 
-125 | # Large dict (no fix due to >10 element limit)
+100 |     pass
+101 | 
+102 | # Multiple comparisons (chained)
+    - if item in [[1], [2]] and item in [[3], [4]]:  # RUF066 (both)
+103 + if item == ([1]) or item == ([2]) and item in [[3], [4]]:  # RUF066 (both)
+104 |     pass
+105 | 
+106 | # Large list
 note: This is an unsafe fix and may change runtime behavior
 
-RUF066 Membership test against dict literal requires reconstructing the dict on each test; use equality comparison or pre-compute the dict
-   --> RUF066.py:126:4
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+   --> RUF066.py:103:27
     |
-125 | # Large dict (no fix due to >10 element limit)
-126 | if key in {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8, "i": 9, "j": 10, "k": 11}:  # RUF066
-    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-127 |     pass
+102 | # Multiple comparisons (chained)
+103 | if item in [[1], [2]] and item in [[3], [4]]:  # RUF066 (both)
+    |                           ^^^^^^^^^^^^^^^^^^
+104 |     pass
     |
 help: Convert to equality comparison
+100 |     pass
+101 | 
+102 | # Multiple comparisons (chained)
+    - if item in [[1], [2]] and item in [[3], [4]]:  # RUF066 (both)
+103 + if item in [[1], [2]] and item == ([3]) or item == ([4]):  # RUF066 (both)
+104 |     pass
+105 | 
+106 | # Large list
+note: This is an unsafe fix and may change runtime behavior
+
+RUF066 [*] Membership test against list/tuple with complex elements requires reconstructing elements on each test
+   --> RUF066.py:107:4
+    |
+106 | # Large list
+107 | if item in [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11]]:  # RUF066
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+108 |     pass
+    |
+help: Convert to equality comparison
+104 |     pass
+105 | 
+106 | # Large list
+    - if item in [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11]]:  # RUF066
+107 + if item == ([1]) or item == ([2]) or item == ([3]) or item == ([4]) or item == ([5]) or item == ([6]) or item == ([7]) or item == ([8]) or item == ([9]) or item == ([10]) or item == ([11]):  # RUF066
+108 |     pass
+note: This is an unsafe fix and may change runtime behavior

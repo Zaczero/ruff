@@ -1,21 +1,5 @@
 # Test cases for RUF066: Inefficient membership test
 
-# Errors - Dict literals (always non-trivial)
-if key in {"foo": 1, "bar": 2}:  # RUF066
-    pass
-
-if key in {"a": 1}:  # RUF066 (single item)
-    pass
-
-if key not in {"foo": 1, "bar": 2, "baz": 3}:  # RUF066
-    pass
-
-if item in {1: "a", 2: "b"}:  # RUF066 (numeric keys)
-    pass
-
-if item in {None: 1, True: 2, False: 3}:  # RUF066 (bool/None keys)
-    pass
-
 # Errors - Lists with complex elements
 if item in [[1, 2], [3, 4]]:  # RUF066
     pass
@@ -56,23 +40,20 @@ if item in []:  # OK
 if item in ():  # OK
     pass
 
-if item in {}:  # OK (dict)
-    pass
-
 if item in set():  # OK
     pass
 
 # OK - Variables (not literals)
-items = {"foo": 1, "bar": 2}
+items = [[1, 2], [3, 4]]
 if key in items:  # OK (variable, not literal)
     pass
 
 # OK - Function calls (not our concern)
-if item in get_dict():  # OK
+if item in get_items():  # OK
     pass
 
 # OK - Other comparison operators
-if item == {"foo": 1}:  # OK (not a membership test)
+if item == [1, 2]:  # OK (not a membership test)
     pass
 
 if item < [1, 2]:  # OK (not a membership test)
@@ -99,8 +80,8 @@ if byte in b"abc":  # OK - bytes is a single constant
 if item not in [[1], [2]]:  # RUF066
     pass
 
-# Complex expressions with dict
-result = key in {"a": 1, "b": 2} or key in {"c": 3}  # RUF066 (both)
+# Complex expressions
+result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
 
 # Test with function calls in container elements
 if item in [func(), func2()]:  # RUF066
@@ -119,9 +100,9 @@ if item in [lambda x: x, lambda y: y]:  # RUF066
     pass
 
 # Multiple comparisons (chained)
-if key in {"a": 1} and value in {"b": 2}:  # RUF066 (both)
+if item in [[1], [2]] and item in [[3], [4]]:  # RUF066 (both)
     pass
 
-# Large dict (no fix due to >10 element limit)
-if key in {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8, "i": 9, "j": 10, "k": 11}:  # RUF066
+# Large list
+if item in [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11]]:  # RUF066
     pass
