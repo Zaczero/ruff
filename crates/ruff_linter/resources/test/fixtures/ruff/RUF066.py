@@ -10,6 +10,13 @@ if item in [{1}, {2}, {3}]:  # RUF066
 if item in [{"a": 1}, {"b": 2}]:  # RUF066
     pass
 
+# Errors - Sets with complex elements
+if item in {func(), other()}:  # RUF066 - function calls in set
+    pass
+
+if item in {1 + 2, 3 + 4}:  # RUF066 - operations in set
+    pass
+
 # OK - Sets with tuple values of simple elements (optimized)
 if item in {(1, 2), (3, 4)}:  # OK - tuples of simple values get optimized
     pass
