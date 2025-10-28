@@ -198,12 +198,16 @@ fn generate_fix(
     let is_not_in = matches!(op, CmpOp::NotIn);
 
     let replacement = if elements.len() == 1 {
-        // Single element: x in [a] -> x == (a) (or x != (a) for not in)
+        // Single element: x in [a] -> x == a (or x != a for not in)
         let element_source = checker.locator().slice(elements[0]);
         let eq_op = if is_not_in { "!=" } else { "==" };
-        format!("{left} {eq_op} ({element_source})")
+        if needs_parentheses(elements[0]) {
+            format!("{left} {eq_op} ({element_source})")
+        } else {
+            format!("{left} {eq_op} {element_source}")
+        }
     } else {
-        // Multiple elements: x in [a, b, c] -> x == (a) or x == (b) or x == (c)
+        // Multiple elements: x in [a, b, c] -> x == a or x == b or x == c
         let logical_op = if is_not_in { " and " } else { " or " };
         let eq_op = if is_not_in { "!=" } else { "==" };
 
@@ -211,7 +215,11 @@ fn generate_fix(
             .iter()
             .map(|element| {
                 let element_source = checker.locator().slice(*element);
-                format!("{left} {eq_op} ({element_source})")
+                if needs_parentheses(element) {
+                    format!("{left} {eq_op} ({element_source})")
+                } else {
+                    format!("{left} {eq_op} {element_source}")
+                }
             })
             .collect();
 
@@ -219,6 +227,20 @@ fn generate_fix(
     };
 
     Some(Edit::range_replacement(replacement, compare.range()))
+}
+
+/// Check if an expression needs parentheses when used as the right operand of `==` or `!=`.
+/// Only expressions with lower precedence than comparison operators need parentheses.
+fn needs_parentheses(expr: &Expr) -> bool {
+    matches!(
+        expr,
+        // Lambda has very low precedence
+        Expr::Lambda(_)
+        // Conditional expressions (ternary) have low precedence
+        | Expr::If(_)
+        // Named expressions (walrus operator :=) have low precedence
+        | Expr::Named(_)
+    )
 }
 
 /// Extract element expressions from a container (list, tuple, or set).

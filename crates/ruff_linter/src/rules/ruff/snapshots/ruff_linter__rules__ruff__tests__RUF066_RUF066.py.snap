@@ -14,7 +14,7 @@ help: Convert to equality comparison
 2 | 
 3 | # Errors - Lists with complex elements
   - if item in [[1, 2], [3, 4]]:  # RUF066
-4 + if item == ([1, 2]) or item == ([3, 4]):  # RUF066
+4 + if item == [1, 2] or item == [3, 4]:  # RUF066
 5 |     pass
 6 | 
 7 | if item in [{1}, {2}, {3}]:  # RUF066
@@ -34,7 +34,7 @@ help: Convert to equality comparison
 5  |     pass
 6  | 
    - if item in [{1}, {2}, {3}]:  # RUF066
-7  + if item == ({1}) or item == ({2}) or item == ({3}):  # RUF066
+7  + if item == {1} or item == {2} or item == {3}:  # RUF066
 8  |     pass
 9  | 
 10 | if item in [{"a": 1}, {"b": 2}]:  # RUF066
@@ -54,7 +54,7 @@ help: Convert to equality comparison
 8  |     pass
 9  | 
    - if item in [{"a": 1}, {"b": 2}]:  # RUF066
-10 + if item == ({"a": 1}) or item == ({"b": 2}):  # RUF066
+10 + if item == {"a": 1} or item == {"b": 2}:  # RUF066
 11 |     pass
 12 | 
 13 | # OK - Sets with tuple values of simple elements (optimized)
@@ -73,7 +73,7 @@ help: Convert to equality comparison
 78 | 
 79 | # Test with 'not in' operator
    - if item not in [[1], [2]]:  # RUF066
-80 + if item != ([1]) and item != ([2]):  # RUF066
+80 + if item != [1] and item != [2]:  # RUF066
 81 |     pass
 82 | 
 83 | # Complex expressions
@@ -93,7 +93,7 @@ help: Convert to equality comparison
 82 | 
 83 | # Complex expressions
    - result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
-84 + result = item == ([1]) or item == ([2]) or item in [[3], [4]]  # RUF066 (both)
+84 + result = item == [1] or item == [2] or item in [[3], [4]]  # RUF066 (both)
 85 | 
 86 | # Test with function calls in container elements
 87 | if item in [func(), func2()]:  # RUF066
@@ -113,7 +113,7 @@ help: Convert to equality comparison
 82 | 
 83 | # Complex expressions
    - result = item in [[1], [2]] or item in [[3], [4]]  # RUF066 (both)
-84 + result = item in [[1], [2]] or item == ([3]) or item == ([4])  # RUF066 (both)
+84 + result = item in [[1], [2]] or item == [3] or item == [4]  # RUF066 (both)
 85 | 
 86 | # Test with function calls in container elements
 87 | if item in [func(), func2()]:  # RUF066
@@ -132,7 +132,7 @@ help: Convert to equality comparison
 85 | 
 86 | # Test with function calls in container elements
    - if item in [func(), func2()]:  # RUF066
-87 + if item == (func()) or item == (func2()):  # RUF066
+87 + if item == func() or item == func2():  # RUF066
 88 |     pass
 89 | 
 90 | # Test with comprehensions in container
@@ -151,7 +151,7 @@ help: Convert to equality comparison
 93 | 
 94 | # Test with operations in elements
    - if item in [1 + 2, 3 + 4]:  # RUF066 (operations are complex)
-95 + if item == (1 + 2) or item == (3 + 4):  # RUF066 (operations are complex)
+95 + if item == 1 + 2 or item == 3 + 4:  # RUF066 (operations are complex)
 96 |     pass
 97 | 
 98 | # Test with lambda
@@ -189,7 +189,7 @@ help: Convert to equality comparison
 101 | 
 102 | # Multiple comparisons (chained)
     - if item in [[1], [2]] and item in [[3], [4]]:  # RUF066 (both)
-103 + if item == ([1]) or item == ([2]) and item in [[3], [4]]:  # RUF066 (both)
+103 + if item == [1] or item == [2] and item in [[3], [4]]:  # RUF066 (both)
 104 |     pass
 105 | 
 106 | # Large list
@@ -208,7 +208,7 @@ help: Convert to equality comparison
 101 | 
 102 | # Multiple comparisons (chained)
     - if item in [[1], [2]] and item in [[3], [4]]:  # RUF066 (both)
-103 + if item in [[1], [2]] and item == ([3]) or item == ([4]):  # RUF066 (both)
+103 + if item in [[1], [2]] and item == [3] or item == [4]:  # RUF066 (both)
 104 |     pass
 105 | 
 106 | # Large list
@@ -227,6 +227,6 @@ help: Convert to equality comparison
 105 | 
 106 | # Large list
     - if item in [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11]]:  # RUF066
-107 + if item == ([1]) or item == ([2]) or item == ([3]) or item == ([4]) or item == ([5]) or item == ([6]) or item == ([7]) or item == ([8]) or item == ([9]) or item == ([10]) or item == ([11]):  # RUF066
+107 + if item == [1] or item == [2] or item == [3] or item == [4] or item == [5] or item == [6] or item == [7] or item == [8] or item == [9] or item == [10] or item == [11]:  # RUF066
 108 |     pass
 note: This is an unsafe fix and may change runtime behavior
